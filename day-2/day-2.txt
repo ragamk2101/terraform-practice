@@ -1,0 +1,720 @@
+# Terraform Session 2 — File Structure, Variables and Outputs
+
+## 1. Terraform Project Structure
+
+
+* Terraform configuration files use the `.tf` extension.
+* Terraform automatically reads all `.tf` files in the same directory.
+* File names are mainly used to organize the Terraform code.
+* Terraform does not require files to be named `main.tf`, `variables.tf`, etc.
+* `.tfvars` files are used to provide values for input variables.
+
+### Common Terraform Files
+
+```text
+terraform-local/
+│
+├── providers.tf
+├── variables.tf
+├── terraform.tfvars
+├── main.tf
+├── outputs.tf
+└── locals.tf
+```
+
+### Purpose of each file
+
+| File               | Purpose                                 |
+| ------------------ | --------------------------------------- |
+| `providers.tf`     | Configure Terraform providers           |
+| `variables.tf`     | Declare input variables                 |
+| `terraform.tfvars` | Provide values for variables            |
+| `main.tf`          | Define resources                        |
+| `outputs.tf`       | Display/export useful values            |
+| `locals.tf`        | Define reusable/calculated local values |
+
+---
+
+# 2. Provider — `providers.tf`
+
+
+* A provider allows Terraform to communicate with an external platform or API.
+* Examples of providers are AWS, Azure, GCP, Kubernetes and Local.
+* For today's training, we will use the Local provider.cd 
+* The Local provider allows Terraform to create and manage files on the local machine.
+* `terraform init` downloads the required provider.
+
+### `providers.tf`
+
+```hcl
+terraform {
+  required_providers {
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.9"
+    }
+  }
+}
+
+provider "local" {
+}
+```
+
+### Explain
+
+```text
+local
+  ↓
+hashicorp/local
+  ↓
+Local Provider
+```
+
+---
+
+# 3. Resource — `main.tf`
+
+
+* Resources are the actual things Terraform creates or manages.
+* The Local provider provides resources such as `local_file`.
+* A resource has a resource type and a resource name.
+
+### `main.tf`
+
+```hcl
+resource "local_file" "test" {
+  filename        = "test.txt"
+  content         = "Hello Terraform"
+  file_permission = "0775"
+}
+```
+
+### Explain the resource block
+
+```text
+resource "local_file" "test"
+          │          │
+          │          └── Resource name
+          └───────────── Resource type
+```
+
+* `local_file` → resource type
+* `test` → resource name
+* `filename` → name of the file
+* `content` → content written to the file
+* `file_permission` → file permission
+
+
+# 4. Variables — `variables.tf`
+
+
+* Hardcoded values make Terraform code less reusable.
+* Variables allow us to pass values dynamically.
+* Variables are normally declared in `variables.tf`.
+* A variable can have:
+
+  * Name
+  * Type
+  * Description
+  * Default value
+  * Sensitive flag
+  * Validation
+
+### Example
+
+`variables.tf`
+
+```hcl
+variable "message" {
+  type        = string
+  description = "Message to write into the file"
+}
+```
+
+Use the variable in `main.tf`:
+
+```hcl
+resource "local_file" "test" {
+  filename        = "test.txt"
+  content         = var.message
+  file_permission = "0775"
+}
+```
+
+---
+
+# 5. `terraform.tfvars`
+
+
+* We declared the variable in `variables.tf`.
+* Now we need to provide a value.
+* `terraform.tfvars` is commonly used to provide variable values.
+* Terraform automatically loads `terraform.tfvars`.
+
+### `terraform.tfvars`
+
+```hcl
+message = "Second Terraform Session"
+```
+
+### Complete flow
+
+```text
+terraform.tfvars
+       ↓
+     message
+       ↓
+ variables.tf
+       ↓
+   var.message
+       ↓
+     main.tf
+       ↓
+  local_file
+       ↓
+    test.txt
+```
+
+---
+
+# 6. String Variable
+
+
+* String represents text.
+* It is one of the most commonly used variable types.
+* Examples:
+
+  * Environment
+  * Application name
+  * Region
+  * Project ID
+  * Username
+
+### `variables.tf`
+
+```hcl
+variable "environment" {
+  type        = string
+  description = "Deployment environment"
+}
+```
+
+### `terraform.tfvars`
+
+```hcl
+environment = "dev"
+```
+
+### Use in `main.tf`
+
+```hcl
+resource "local_file" "environment" {
+  filename = "environment.txt"
+  content  = "Environment: ${var.environment}"
+}
+```
+
+Output file:
+
+```text
+Environment: dev
+```
+
+---
+
+# 7. Number Variable
+
+
+* Number is used for numeric values.
+* Examples:
+
+  * Instance count
+  * Port
+  * Disk size
+  * Version number
+
+### `variables.tf`
+
+```hcl
+variable "version" {
+  type = number
+}
+```
+
+### `terraform.tfvars`
+
+```hcl
+version = 2
+```
+
+### Use in `main.tf`
+
+```hcl
+resource "local_file" "version" {
+  filename = "version.txt"
+  content  = "Application Version: ${var.version}"
+}
+```
+
+Output:
+
+```text
+Application Version: 2
+```
+
+---
+
+# 8. Boolean Variable
+
+
+* Boolean has only two values:
+
+  * `true`
+  * `false`
+* Commonly used for enabling or disabling features.
+
+### `variables.tf`
+
+```hcl
+variable "monitoring_enabled" {
+  type = bool
+}
+```
+
+### `terraform.tfvars`
+
+```hcl
+monitoring_enabled = true
+```
+
+### Use in `main.tf`
+
+```hcl
+resource "local_file" "monitoring" {
+  filename = "monitoring.txt"
+  content  = "Monitoring Enabled: ${var.monitoring_enabled}"
+}
+```
+
+Output:
+
+```text
+Monitoring Enabled: true
+```
+
+---
+
+# 9. List Variable
+
+
+* A list contains multiple values.
+* List elements are ordered.
+* List normally contains values of the same type.
+* We access list elements using an index.
+* Index starts from `0`.
+
+### `variables.tf`
+
+```hcl
+variable "topics" {
+  type = list(string)
+}
+```
+
+### `terraform.tfvars`
+
+```hcl
+topics = [
+  "Variables",
+  "Providers",
+  "Resources",
+  "Outputs"
+]
+```
+
+# 10. Variable Default Value
+
+
+* A variable can have a default value.
+* If the user does not provide a value, Terraform uses the default.
+* Variables without a default value normally require an input.
+
+### Example
+
+```hcl
+variable "environment" {
+  type    = string
+  default = "dev"
+}
+```
+
+If no value is provided:
+
+```text
+environment = dev
+```
+
+If `terraform.tfvars` contains:
+
+```hcl
+environment = "prod"
+```
+
+then:
+
+```text
+environment = prod
+```
+
+---
+
+# 11. Sensitive Variable
+
+
+* Sensitive variables are used for secrets.
+* Examples:
+
+  * Password
+  * API token
+  * Secret key
+* `sensitive = true` prevents Terraform from displaying the value normally in CLI output.
+* Sensitive values can still exist in Terraform state.
+
+### `variables.tf`
+
+```hcl
+variable "password" {
+  type      = string
+  sensitive = true
+}
+```
+
+### `terraform.tfvars`
+
+```hcl
+password = "MySecretPassword"
+```
+
+---
+
+# 12. Variable Validation
+
+
+* Validation allows us to control what values users can provide.
+* It prevents invalid input before infrastructure is created.
+* Useful for environments, regions, sizes, etc.
+
+### Example
+
+```hcl
+variable "environment" {
+  type = string
+
+  validation {
+    condition = contains(
+      ["dev", "qa", "prod"],
+      var.environment
+    )
+
+    error_message = "Environment must be dev, qa, or prod."
+  }
+}
+```
+
+Valid:
+
+```hcl
+environment = "dev"
+```
+
+Invalid:
+
+```hcl
+environment = "testing"
+```
+
+Terraform will return a validation error.
+
+---
+
+# 17. Outputs — `outputs.tf`
+
+
+* Variables are inputs to Terraform.
+* Outputs provide useful information back to the user.
+* Outputs are normally declared in `outputs.tf`.
+* Common output examples:
+
+  * Resource ID
+  * IP address
+  * URL
+  * File name
+  * Bucket name
+
+### `outputs.tf`
+
+```hcl
+output "file_name" {
+  value = local_file.test.filename
+}
+```
+
+Another output:
+
+```hcl
+output "file_content" {
+  value = local_file.test.content
+}
+```
+
+Run:
+
+```bash
+terraform apply
+```
+
+Example output:
+
+```text
+file_name    = "test.txt"
+file_content = "Hello Terraform"
+```
+
+---
+
+# 18. Locals — `locals.tf`
+
+
+* Locals are reusable values inside Terraform.
+* They are calculated or defined within the Terraform configuration.
+* They help avoid repeating the same expression multiple times.
+* Input variables come from the user.
+* Locals are created inside Terraform.
+
+### `locals.tf`
+
+```hcl
+locals {
+  application_name = "payment-app"
+  environment      = var.environment
+
+  file_name = "${local.application_name}-${local.environment}.txt"
+}
+```
+
+### Use in `main.tf`
+
+```hcl
+resource "local_file" "application" {
+  filename = local.file_name
+  content  = "Application: ${local.application_name}"
+}
+```
+
+If environment is:
+
+```text
+dev
+```
+
+Terraform creates:
+
+```text
+payment-app-dev.txt
+```
+
+---
+
+# 19. Complete Example
+
+## Directory Structure
+
+```text
+terraform-local/
+│
+├── providers.tf
+├── variables.tf
+├── terraform.tfvars
+├── locals.tf
+├── main.tf
+└── outputs.tf
+```
+
+---
+
+## providers.tf
+
+```hcl
+terraform {
+  required_providers {
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.9"
+    }
+  }
+}
+
+provider "local" {
+}
+```
+
+---
+
+## variables.tf
+
+```hcl
+variable "application_name" {
+  type        = string
+  description = "Application name"
+}
+
+variable "environment" {
+  type        = string
+  description = "Deployment environment"
+
+  validation {
+    condition     = contains(["dev", "qa", "prod"], var.environment)
+    error_message = "Environment must be dev, qa, or prod."
+  }
+}
+
+variable "version" {
+  type = number
+}
+
+variable "monitoring_enabled" {
+  type = bool
+}
+```
+
+---
+
+## terraform.tfvars
+
+```hcl
+application_name   = "payment-app"
+environment        = "dev"
+version            = 1
+monitoring_enabled = true
+```
+
+---
+
+## locals.tf
+
+```hcl
+locals {
+  file_name = "${var.application_name}-${var.environment}.txt"
+}
+```
+
+---
+
+## main.tf
+
+```hcl
+resource "local_file" "application" {
+  filename = local.file_name
+
+  content = <<EOF
+Application: ${var.application_name}
+Environment: ${var.environment}
+Version: ${var.version}
+Monitoring Enabled: ${var.monitoring_enabled}
+EOF
+
+  file_permission = "0775"
+}
+```
+
+---
+
+## outputs.tf
+
+```hcl
+output "file_name" {
+  value = local_file.application.filename
+}
+
+output "file_content" {
+  value = local_file.application.content
+}
+```
+
+---
+
+# 20. Terraform Commands
+
+### Initialize Terraform
+
+```bash
+terraform init
+```
+
+Purpose:
+
+* Initializes the working directory.
+* Downloads required providers.
+
+### Format code
+
+```bash
+terraform fmt
+```
+
+Purpose:
+
+* Formats Terraform configuration.
+
+### Validate configuration
+
+```bash
+terraform validate
+```
+
+Purpose:
+
+* Checks whether Terraform configuration is syntactically valid.
+
+### Create execution plan
+
+```bash
+terraform plan
+```
+
+Purpose:
+
+* Shows what Terraform intends to create, modify or destroy.
+
+### Apply configuration
+
+```bash
+terraform apply
+```
+
+Purpose:
+
+* Creates or modifies resources.
+
+### Display outputs
+
+```bash
+terraform output
+```
+
+Purpose:
+
+* Displays Terraform outputs.
+
+### Destroy resources
+
+```bash
+terraform destroy
+```
+
+Purpose:
+
+* Removes resources managed by Terraform.
+
+---
+

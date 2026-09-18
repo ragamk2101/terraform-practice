@@ -1,0 +1,38 @@
+Day 1 – Traditional Infrastructure vs Terraform (IaC Basics)
+
+- Traditional Infrastructure Management
+  - Manual setup using cloud consoles or CLI.
+  - Each engineer follows their own steps → risk of inconsistency.
+  - Hard to reproduce environments (dev, test, prod differ).
+  - Documentation often lags behind actual configuration.
+  - Scaling requires repeating manual steps → slow and error-prone.
+
+- Challenges with Traditional Approach
+  - Human error due to repetitive manual tasks.
+  - No version control → changes are undocumented.
+  - Difficult collaboration across teams.
+  - Poor visibility into what is deployed.
+  - Hard rollback if something breaks.
+
+- Terraform Approach (Infrastructure as Code)
+  - Declarative language (HCL) defines *desired state* of infrastructure.
+  - Automated provisioning → consistent across environments.
+  - Configurations stored in files → version controlled with Git.
+  - Easy collaboration → same codebase shared by teams.
+  - Supports multiple providers (GCP, AWS, Azure, Kubernetes).
+  - Enables scaling and reproducibility with minimal effort.
+
+- Benefits of Terraform over Traditional
+  - Consistency: Same code deploys identical infra every time.
+  - Automation: No manual clicks, faster deployments.
+  - Version Control: Track changes, roll back easily.
+  - Collaboration: Teams work on shared codebase.
+  - Multi-cloud: One tool for different platforms.
+  - Reusability: Modules and variables reduce duplication.
+
+
+
+1. local resource
+2. Terraform cli
+fmt, init, validate, plan, apply, destroy
+3. created local file and updated
