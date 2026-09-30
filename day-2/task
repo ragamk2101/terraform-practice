@@ -2,4 +2,4 @@ write terraform code for local file creation
 1. name server.txt 
 2. permission will be 577
 3. content will be envrionment and team name 
-4. make sure permission , name of file , envrionment and team passed from varibales abd values from tfvar file
+4. make sure permission , name of file , envrionment and team passed from varibales and values from tfvar file
