@@ -1,0 +1,16 @@
+Create GCS bucket which will have name as "project_id-environment"
+ where peoject_id and environment need to pass from variables
+ it should have lables with below :
+ team_name
+ department_name
+Bucket object expire which created before 5 October 2026
+stoarge class will STANDARD
+
+ouput should be name, storage_class and team_name
+
+**************************************************************************
+1. module development GCS
+2. resources -> VPC , subnet, firewall, compute, GKE
+3. module developmenet #2
+4. final use of module directly from github
+**************************************************************************
