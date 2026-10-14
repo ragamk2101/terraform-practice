@@ -14,3 +14,7 @@ ouput should be name, storage_class and team_name
 3. module developmenet #2
 4. final use of module directly from github
 **************************************************************************
+
+
+Task:
+create local module from day 6 which will be creating VPC, subnet and firewall rule
